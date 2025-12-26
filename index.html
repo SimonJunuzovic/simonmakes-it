@@ -2482,15 +2482,43 @@
 
         function copyEmail(btn) {
             const email = 'simon.junuzovic@gmail.com';
-            navigator.clipboard.writeText(email).then(() => {
-                btn.classList.add('copied');
-                btn.querySelector('.btn-text').textContent = 'Email copied!';
-                
-                setTimeout(() => {
-                    btn.classList.remove('copied');
-                    btn.querySelector('.btn-text').textContent = 'Copy email';
-                }, 2000);
-            });
+            
+            // Try modern clipboard API first, fallback to older method
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(email).then(() => {
+                    showCopied(btn);
+                }).catch(() => {
+                    fallbackCopy(email, btn);
+                });
+            } else {
+                fallbackCopy(email, btn);
+            }
+        }
+        
+        function fallbackCopy(text, btn) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopied(btn);
+            } catch (err) {
+                alert('Email: ' + text);
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        function showCopied(btn) {
+            btn.classList.add('copied');
+            btn.querySelector('.btn-text').textContent = 'Email copied!';
+            
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btn.querySelector('.btn-text').textContent = 'Copy email';
+            }, 2000);
         }
 
         // Nav scroll effect
